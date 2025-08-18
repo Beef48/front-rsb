@@ -23,10 +23,8 @@ function interpolateArray(xPoints: number[], yPoints: number[], xGrid: number[])
   });
 }
 
-// Configuration de l'API - utilise le backend Vercel en production
-const API_BASE_URL = import.meta.env.PROD 
-  ? 'https://back-4lagz8iwv-brunos-projects-0953a500.vercel.app'
-  : '/api';
+// Configuration de l'API - utilise le proxy en production et développement
+const API_BASE_URL = '/api';
 
 export interface Person {
   id: number | string;

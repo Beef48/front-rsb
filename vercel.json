@@ -1,6 +1,12 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "dist",
+  "outputDirectory": "public",
   "devCommand": "npm run dev",
-  "installCommand": "npm install"
+  "installCommand": "npm install",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://back-4lagz8iwv-brunos-projects-0953a500.vercel.app/$1"
+    }
+  ]
 }
