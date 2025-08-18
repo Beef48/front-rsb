@@ -23,8 +23,10 @@ function interpolateArray(xPoints: number[], yPoints: number[], xGrid: number[])
   });
 }
 
-// Utilise le proxy Vite: toutes les requêtes partent vers /api et sont proxyées vers le backend
-const API_BASE_URL = '/api';
+// Configuration de l'API - utilise le backend Vercel en production
+const API_BASE_URL = import.meta.env.PROD 
+  ? 'https://back-4lagz8iwv-brunos-projects-0953a500.vercel.app'
+  : '/api';
 
 export interface Person {
   id: number | string;
