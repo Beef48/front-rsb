@@ -1,0 +1,1026 @@
+﻿================================================================================
+                    MODE D'EMPLOI - ANALYSEUR RSB
+              Reconnaissance Vocale dans le Bruit - Version Professionnelle
+================================================================================
+
+Document version : 1.0
+Date de création : Décembre 2024
+Application : Analyseur RSB - Interface Web React/TypeScript
+
+================================================================================
+                                TABLE DES MATIÈRES
+================================================================================
+
+1. INTRODUCTION ET CONTEXTE SCIENTIFIQUE ................................. 3
+2. INSTALLATION ET DÉMARRAGE .............................................. 4
+3. INTERFACE PRINCIPALE ET NAVIGATION ..................................... 5
+4. MODE BASE DE DONNÉES - ANALYSE DE PARTICIPANTS ......................... 7
+5. MODE FICHIERS - UPLOAD ET TRAITEMENT AUTOMATIQUE ...................... 9
+6. ANALYSES ET VISUALISATIONS AVANCÉES .................................. 11
+7. ANALYSE PHONÉTIQUE DÉTAILLÉE ......................................... 13
+8. COMPARAISON ENTRE PARTICIPANTS ........................................ 15
+9. EXPORT ET IMPRESSION DES RÉSULTATS ................................... 17
+10. INTERPRÉTATION SCIENTIFIQUE DES RÉSULTATS ........................... 19
+11. DÉPANNAGE ET RÉSOLUTION DE PROBLÈMES ................................ 21
+12. ANNEXES TECHNIQUES ................................................... 23
+
+================================================================================
+1. INTRODUCTION ET CONTEXTE SCIENTIFIQUE
+================================================================================
+
+1.1 QU'EST-CE QUE LE RSB (RAPPORT SIGNAL/BRUIT) ?
+--------------------------------------------------
+
+Le Rapport Signal/Bruit (RSB) est une mesure fondamentale en audiologie qui quantifie 
+la différence d'intensité entre un signal vocal utile et le bruit de fond ambiant. 
+Il s'exprime en décibels (dB) selon la formule :
+
+    RSB = 20 × log₁₀(Signal/Bruit)
+
+• RSB positif : Le signal est plus fort que le bruit (conditions favorables)
+• RSB nul (0 dB) : Signal et bruit ont la même intensité
+• RSB négatif : Le bruit est plus fort que le signal (conditions difficiles)
+
+1.2 OBJECTIFS DE L'ANALYSEUR RSB
+---------------------------------
+
+Cette application professionnelle permet :
+
+✓ L'analyse quantitative de la reconnaissance vocale dans le bruit
+✓ L'évaluation des capacités auditives et de traitement du signal
+✓ La comparaison objective entre différents participants
+✓ L'analyse phonétique détaillée des erreurs de perception
+✓ La génération de rapports scientifiques standardisés
+
+1.3 APPLICATIONS CLINIQUES ET RECHERCHE
+----------------------------------------
+
+• Diagnostic audiologique différentiel
+• Évaluation des appareils auditifs et implants cochléaires
+• Recherche en neurosciences auditives
+• Validation d'algorithmes de traitement du signal
+• Études épidémiologiques sur la presbyacousie
+
+[EMPLACEMENT CAPTURE D'ÉCRAN 1 : Vue d'ensemble de l'interface principale]
+
+================================================================================
+2. INSTALLATION ET DÉMARRAGE
+================================================================================
+
+2.1 PRÉREQUIS SYSTÈME
+----------------------
+
+Configuration minimale recommandée :
+• Système d'exploitation : Windows 10/11, macOS 10.15+, Linux Ubuntu 18.04+
+• Navigateur web moderne : Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
+• Mémoire RAM : 8 GB minimum, 16 GB recommandés
+• Processeur : Intel i5 ou équivalent AMD
+• Connexion réseau pour mode base de données
+
+2.2 INSTALLATION DU FRONTEND
+-----------------------------
+
+1. Ouvrir un terminal/invite de commandes
+2. Naviguer vers le dossier du projet :
+   cd chemin/vers/front
+
+3. Installer les dépendances Node.js :
+   npm install
+
+4. Lancer l'application en mode développement :
+   npm run dev
+
+5. Accéder à l'interface via l'URL affichée (généralement http://localhost:5173)
+
+2.3 CONFIGURATION DU BACKEND (OPTIONNEL)
+-----------------------------------------
+
+Pour le mode base de données Supabase :
+
+1. Naviguer vers le dossier backend :
+   cd chemin/vers/back
+
+2. Lancer le serveur backend :
+   node server.js
+
+3. Vérifier la connexion sur le port 3100
+
+2.4 VÉRIFICATION DE L'INSTALLATION
+-----------------------------------
+
+Au démarrage, l'application affiche :
+• Status de connexion (Base de données/Fichiers)
+• Interface principale avec tous les panneaux
+• Pas d'erreurs dans la console navigateur (F12)
+
+[EMPLACEMENT CAPTURE D'ÉCRAN 2 : Écran de démarrage avec statut de connexion]
+
+================================================================================
+3. INTERFACE PRINCIPALE ET NAVIGATION
+================================================================================
+
+3.1 ARCHITECTURE DE L'INTERFACE
+--------------------------------
+
+L'interface est organisée en zones fonctionnelles distinctes :
+
+HEADER (Barre supérieure)
+• Titre de l'application et logo
+• Bouton d'impression globale
+• Indicateurs de statut
+
+PANNEAU DE CONFIGURATION (Zone centrale haute)
+• Sélection du mode d'analyse (Base de données / Fichiers)
+• Activation des modules d'analyse avancée
+• Contrôles d'affichage
+
+ZONE D'ANALYSE PRINCIPALE (Zone centrale)
+• Sélecteur de participants ou upload de fichiers
+• Graphiques de résultats RSB
+• Panneaux statistiques
+
+PANNEAUX AVANCÉS (Zones étendues)
+• Analyse phonétique détaillée
+• Comparaisons inter-participants
+• Statistiques globales sur les mots
+
+3.2 MODES DE FONCTIONNEMENT
+----------------------------
+
+L'application propose deux modes principaux :
+
+MODE BASE DE DONNÉES
+• Connexion à une base Supabase
+• Sélection de participants prééxistants
+• Recherche et filtrage avancés
+• Analyses comparatives étendues
+
+MODE FICHIERS LOCAUX
+• Upload de fichiers CSV/Excel
+• Traitement automatique des données
+• Analyse immédiate sans stockage
+• Idéal pour analyses ponctuelles
+
+3.3 MODULES D'ANALYSE DISPONIBLES
+----------------------------------
+
+ANALYSE STANDARD (toujours active)
+• Courbes RSB avec intervalles de confiance
+• Statistiques descriptives
+• Temps de réponse
+• Export des résultats
+
+MODULES OPTIONNELS (activation par boutons)
+• 📊 Stats des mots : Analyse détaillée par mot testé
+• 👥 Comparaison : Comparaison entre 2+ participants
+• 🔊 Phonétique : Analyse des erreurs phonémiques
+• 📈 Graphiques temporels : Corrélations temps/précision
+
+[EMPLACEMENT CAPTURE D'ÉCRAN 3 : Interface principale avec annotations des zones]
+
+================================================================================
+4. MODE BASE DE DONNÉES - ANALYSE DE PARTICIPANTS
+================================================================================
+
+4.1 SÉLECTION DE LA SOURCE DE DONNÉES
+--------------------------------------
+
+1. Cliquer sur le bouton "Base de données" dans la barre de configuration
+2. Vérifier le statut de connexion :
+   • 🔵 Bleu clignotant : Vérification en cours
+   • 🟢 Vert : Connecté au serveur
+   • 🔴 Rouge : Erreur de connexion
+
+En cas d'erreur de connexion, vérifier :
+• Le serveur backend est démarré (port 3100)
+• La configuration réseau
+• Les paramètres de la base Supabase
+
+4.2 INTERFACE DE SÉLECTION DES PARTICIPANTS
+--------------------------------------------
+
+Le panneau de sélection affiche :
+
+ZONE DE RECHERCHE
+• Champ de recherche par nom (recherche en temps réel)
+• Filtres par critères (âge, date de test, etc.)
+
+LISTE DES PARTICIPANTS
+• Nom du participant
+• Âge au moment du test  
+• Date et heure du test
+• Indicateur de données disponibles
+
+PARTICIPANTS SÉLECTIONNÉS
+• Liste des participants choisis pour l'analyse
+• Bouton de suppression individuelle
+• Compteur total de sélection
+
+4.3 SÉLECTION MULTIPLE ET CRITÈRES
+-----------------------------------
+
+SÉLECTION INDIVIDUELLE
+• Clic sur un participant pour l'ajouter
+• Confirmation visuelle par surbrillance
+• Ajout automatique à la liste de sélection
+
+SÉLECTION MULTIPLE
+• Maintenir Ctrl (Windows) ou Cmd (Mac) pour sélection multiple
+• Pas de limite théorique du nombre de participants
+• Recommandation : 2-10 participants pour analyses comparatives optimales
+
+CRITÈRES DE QUALITÉ DES DONNÉES
+• Participants avec données RSB complètes
+• Tests réalisés dans des conditions similaires
+• Cohérence des protocoles d'acquisition
+
+4.4 LANCEMENT DE L'ANALYSE
+---------------------------
+
+1. Sélectionner au minimum 1 participant
+2. Cliquer sur "Analyser les participants sélectionnés"
+3. Attendre le traitement automatique des données
+4. Visualisation immédiate des résultats
+
+INDICATEURS DE PROGRESSION
+• Barre de progression pour analyses lourdes
+• Messages de statut détaillés
+• Estimation du temps restant
+
+[EMPLACEMENT CAPTURE D'ÉCRAN 4 : Interface de sélection des participants]
+[EMPLACEMENT CAPTURE D'ÉCRAN 5 : Résultats d'analyse multi-participants]
+
+================================================================================
+5. MODE FICHIERS - UPLOAD ET TRAITEMENT AUTOMATIQUE
+================================================================================
+
+5.1 PRÉPARATION DES FICHIERS DE DONNÉES
+----------------------------------------
+
+FORMATS SUPPORTÉS
+• CSV (Comma Separated Values) - Encodage UTF-8 recommandé
+• Excel (.xlsx, .xls) - Toutes versions récentes
+• Format de données standardisé requis
+
+STRUCTURE ATTENDUE DES DONNÉES
+Les fichiers doivent contenir les champs suivants :
+
+MÉTADONNÉES PARTICIPANT
+• person_name : Nom du participant
+• age : Âge (optionnel)
+• test_date : Date du test (optionnel)
+
+PARAMÈTRES DU TEST RSB
+• rsbStart : RSB initial (dB)
+• rsbEnd : RSB final (dB)  
+• rsbStep : Pas de variation du RSB (dB)
+• wordCnt : Nombre total de mots testés
+
+DONNÉES PAR MOT (répétées pour chaque mot)
+• wordHist/N/word : Mot cible (N = index du mot)
+• wordHist/N/resp : Réponse du participant
+• wordHist/N/rsb : Niveau RSB pour ce mot
+• wordHist/N/beginningOfSpeechTime : Temps début (ms)
+• wordHist/N/endOfSpeechTime : Temps fin (ms)
+
+5.2 PROCÉDURE D'UPLOAD
+----------------------
+
+1. Sélectionner le mode "Fichiers" dans la configuration
+2. Cliquer sur la zone d'upload ou glisser-déposer les fichiers
+3. Sélectionner un ou plusieurs fichiers simultanément
+4. Validation automatique du format et de la structure
+
+INDICATEURS VISUELS D'UPLOAD
+• 🔄 Jaune : Fichier en cours de traitement
+• ✅ Vert : Fichier traité avec succès
+• ❌ Rouge : Erreur de traitement
+• Compteur de progression global
+
+5.3 TRAITEMENT AUTOMATIQUE DES DONNÉES
+---------------------------------------
+
+L'application effectue automatiquement :
+
+VALIDATION STRUCTURELLE
+• Vérification de la présence des champs obligatoires
+• Contrôle de cohérence des données numériques
+• Détection des valeurs aberrantes
+
+CALCULS DÉRIVÉS
+• Interpolation sur grille RSB commune
+• Calculs statistiques (moyenne, écart-type, intervalles)
+• Détection automatique des seuils RSB
+
+NETTOYAGE DES DONNÉES
+• Élimination des mots non répondus
+• Correction des incohérences temporelles
+• Normalisation des formats de réponse
+
+5.4 GESTION DES ERREURS
+-----------------------
+
+ERREURS COURANTES ET SOLUTIONS
+
+"Format de fichier non reconnu"
+→ Vérifier l'extension (.csv, .xlsx)
+→ Contrôler l'encodage (UTF-8 pour CSV)
+
+"Champs obligatoires manquants"
+→ Vérifier la structure des données
+→ Consulter l'exemple de format fourni
+
+"Données insuffisantes"
+→ Minimum 3 niveaux RSB requis
+→ Au moins 5 mots par niveau RSB
+
+"Erreur de parsing"
+→ Vérifier les séparateurs CSV (virgule/point-virgule)
+→ Contrôler les valeurs numériques (point décimal)
+
+[EMPLACEMENT CAPTURE D'ÉCRAN 6 : Interface d'upload avec statuts des fichiers]
+[EMPLACEMENT CAPTURE D'ÉCRAN 7 : Exemple de fichier CSV correctement formaté]
+
+================================================================================
+6. ANALYSES ET VISUALISATIONS AVANCÉES
+================================================================================
+
+6.1 GRAPHIQUE PRINCIPAL RSB
+----------------------------
+
+Le graphique central affiche la performance en fonction du RSB :
+
+AXE HORIZONTAL (X) : Rapport Signal/Bruit (dB)
+• Plage adaptative selon les données
+• Graduation automatique tous les 2-5 dB
+• Orientation croissante de gauche à droite
+
+AXE VERTICAL (Y) : Pourcentage de reconnaissance (%)
+• Plage 0-100% avec graduation tous les 10%
+• Interpolation linéaire entre points mesurés
+• Lissage automatique des courbes
+
+COURBES INDIVIDUELLES
+• Une couleur unique par participant/fichier
+• Marqueurs de données aux points mesurés
+• Légende interactive avec noms des participants
+
+COURBE MOYENNE (si multiple participants)
+• Ligne épaisse en noir ou couleur distinctive
+• Calcul point par point sur grille commune
+• Pondération égale de tous les participants
+
+6.2 INTERVALLES DE CONFIANCE
+-----------------------------
+
+Affichage optionnel (bouton activation) :
+
+ZONE OMBRÉE
+• Intervalle de confiance à 95% par défaut
+• Calcul basé sur écart-type et distribution t-Student
+• Transparence pour visualisation des courbes sous-jacentes
+
+INTERPRÉTATION STATISTIQUE
+• Zone étroite = faible variabilité inter-individuelle
+• Zone large = grande hétérogénéité des performances
+• Asymétrie possible selon la distribution des données
+
+6.3 PANNEAU STATISTIQUES DÉTAILLÉES
+------------------------------------
+
+MÉTRIQUES GLOBALES
+• RSB@50% : Seuil de reconnaissance à 50% (mesure de référence)
+• RSB@90% : Seuil de haute performance
+• Pente de la courbe : Rapidité d'amélioration avec le RSB
+• Plateau maximal : Performance optimale atteinte
+
+STATISTIQUES PAR NIVEAU RSB
+• Moyenne arithmétique
+• Écart-type (dispersion)
+• Valeurs minimale et maximale
+• Nombre de participants par point
+
+MÉTRIQUES TEMPORELLES
+• Temps de réponse moyen par niveau RSB
+• Variabilité temporelle (écart-type des temps)
+• Corrélation temps/précision
+• Détection des timeouts et non-réponses
+
+6.4 GRAPHIQUE TEMPS DE RÉPONSE
+-------------------------------
+
+Analyse temporelle complémentaire :
+
+PRÉSENTATION
+• Boxplots par niveau RSB
+• Médiane, quartiles, valeurs extrêmes
+• Detection des outliers temporels
+
+INTERPRÉTATION
+• Augmentation du temps avec la difficulté (RSB décroissant)
+• Variabilité accrue dans les conditions difficiles
+• Profils de stratégies cognitives différenciées
+
+[EMPLACEMENT CAPTURE D'ÉCRAN 8 : Graphique RSB principal avec intervalles de confiance]
+[EMPLACEMENT CAPTURE D'ÉCRAN 9 : Panneau de statistiques détaillées]
+
+================================================================================
+7. ANALYSE PHONÉTIQUE DÉTAILLÉE
+================================================================================
+
+7.1 PRINCIPE DE L'ANALYSE PHONÉTIQUE
+-------------------------------------
+
+L'analyse phonétique compare les mots cibles et les réponses des participants 
+au niveau des phonèmes individuels :
+
+TRANSCRIPTION AUTOMATIQUE
+• Conversion graphème → phonème selon les règles du français
+• Alphabet Phonétique International (API) simplifié
+• Prise en compte des variations régionales courantes
+
+ALIGNEMENT DES SÉQUENCES
+• Algorithme d'alignement optimal (programmation dynamique)
+• Gestion des insertions, suppressions, substitutions
+• Calcul de distance phonétique pondérée
+
+7.2 ACTIVATION DU MODULE PHONÉTIQUE
+------------------------------------
+
+1. Cliquer sur le bouton "🔊 Phonétique" dans la barre de configuration
+2. Le module s'active pour tous les participants analysés
+3. Calculs automatiques en arrière-plan
+4. Affichage des résultats dans un panneau dédié
+
+7.3 MÉTRIQUES PHONÉTIQUES CALCULÉES
+------------------------------------
+
+PRÉCISION PHONÉTIQUE GLOBALE
+• Pourcentage de phonèmes correctement perçus
+• Calcul global et par niveau RSB
+• Comparaison avec la précision lexicale (mots entiers)
+
+ANALYSE PAR CATÉGORIES PHONÉTIQUES
+• Voyelles : /a/, /e/, /i/, /o/, /u/, /ə/, etc.
+• Consonnes occlusives : /p/, /b/, /t/, /d/, /k/, /g/
+• Consonnes fricatives : /f/, /v/, /s/, /z/, /ʃ/, /ʒ/
+• Consonnes nasales : /m/, /n/, /ɲ/, /ŋ/
+• Consonnes liquides : /l/, /r/
+
+ANALYSE POSITIONNELLE
+• Début de mot : Phonèmes en position initiale
+• Milieu de mot : Phonèmes en position médiane  
+• Fin de mot : Phonèmes en position finale
+• Effet de position sur la perceptibilité
+
+7.4 MATRICE DE CONFUSION PHONÉTIQUE
+------------------------------------
+
+Tableau croisé des confusions observées :
+
+LIGNES : Phonèmes cibles (attendus)
+COLONNES : Phonèmes perçus (réponses)
+CELLULES : Fréquence des confusions
+
+INTERPRÉTATION CLINIQUE
+• Confusions /p/-/b/ : Difficulté voisement
+• Confusions /f/-/s/ : Problème de lieu d'articulation
+• Confusions vocaliques : Altération des formants
+• Patterns systématiques révélateurs de pathologies
+
+7.5 DISTANCE PHONÉTIQUE
+------------------------
+
+Mesure quantitative de la similitude perceptuelle :
+
+CALCUL DE DISTANCE
+• Traits distinctifs pondérés (lieu, mode, voisement)
+• Distance de Levenshtein adaptée aux phonèmes
+• Normalisation par la longueur des mots
+
+APPLICATIONS
+• Comparaison objective de la qualité de perception
+• Suivi longitudinal de l'évolution
+• Validation d'algorithmes de correction d'erreurs
+
+[EMPLACEMENT CAPTURE D'ÉCRAN 10 : Interface d'analyse phonétique complète]
+[EMPLACEMENT CAPTURE D'ÉCRAN 11 : Matrice de confusion phonétique]
+
+================================================================================
+8. COMPARAISON ENTRE PARTICIPANTS
+================================================================================
+
+8.1 ACTIVATION DU MODE COMPARAISON
+-----------------------------------
+
+1. Cliquer sur le bouton "👥 Comparaison" dans la configuration
+2. Sélectionner au minimum 2 participants
+3. Interface dédiée de comparaison s'affiche
+4. Analyses contrastives automatiques
+
+8.2 COMPARAISONS GRAPHIQUES
+----------------------------
+
+SUPERPOSITION DES COURBES RSB
+• Différenciation par couleurs et styles de ligne
+• Légende interactive avec statistiques individuelles
+• Zoom sur zones de différence significative
+
+GRAPHIQUES DE DIFFÉRENCES
+• Courbe de différence point par point
+• Zones de différence statistiquement significative
+• Tests de significativité intégrés (t-test appariés)
+
+8.3 ANALYSES STATISTIQUES COMPARATIVES
+---------------------------------------
+
+TESTS D'HYPOTHÈSES
+• Comparaison des RSB@50% (seuils de performance)
+• Tests de pentes (vitesse d'amélioration)
+• Analyse de variance à mesures répétées (ANOVA-MR)
+
+MÉTRIQUES DE DIFFÉRENCE
+• Différence moyenne de performance par RSB
+• Écart-type des différences
+• Pourcentage de recouvrement des performances
+• Indice de similarité globale
+
+8.4 PROFILS DIFFÉRENTIELS
+--------------------------
+
+CLASSIFICATION AUTOMATIQUE
+• Profil "Résistant au bruit" : Performance élevée en RSB négatif
+• Profil "Sensible au bruit" : Chute rapide avec dégradation RSB
+• Profil "Intermédiaire" : Performance moyenne stable
+
+INDICATEURS CLINIQUES
+• Asymétrie de performance entre participants
+• Zones de force/faiblesse relatives
+• Recommandations d'appareillage différencié
+
+8.5 COMPARAISON PHONÉTIQUE AVANCÉE
+-----------------------------------
+
+Si le module phonétique est activé :
+
+DIFFÉRENCES PAR CATÉGORIES
+• Comparaison des erreurs vocaliques vs consonantiques
+• Profils de confusion différenciés
+• Stratégies de traitement auditif contrastées
+
+COMPLÉMENTARITÉ DES PROFILS
+• Identification des forces compensatoires
+• Patterns d'erreurs spécifiques par participant
+• Applications en réhabilitation auditive
+
+[EMPLACEMENT CAPTURE D'ÉCRAN 12 : Interface de comparaison multi-participants]
+[EMPLACEMENT CAPTURE D'ÉCRAN 13 : Graphiques de différences statistiques]
+
+================================================================================
+9. EXPORT ET IMPRESSION DES RÉSULTATS
+================================================================================
+
+9.1 OPTIONS D'EXPORT DISPONIBLES
+---------------------------------
+
+L'application propose plusieurs formats d'export professionnels :
+
+EXPORT CSV (Données brutes)
+• Format compatible Excel, R, SPSS, Python
+• Données par participant et moyennes
+• Métadonnées complètes incluses
+• Codage UTF-8 pour caractères spéciaux
+
+RAPPORT COMPLET (Texte formaté)
+• Synthèse exécutive de l'analyse
+• Statistiques détaillées par participant
+• Recommandations cliniques automatiques
+• Format imprimable standardisé
+
+EXPORT GRAPHIQUE (Images haute résolution)
+• Format PNG/SVG vectoriel
+• Résolution 300 DPI pour publication
+• Titres et légendes intégrés
+• Transparence pour intégration documents
+
+9.2 PROCÉDURE D'EXPORT
+-----------------------
+
+EXPORT SIMPLE
+1. Analyser les données (participants ou fichiers)
+2. Accéder au panneau "Export des résultats"
+3. Choisir le format désiré
+4. Téléchargement automatique
+
+PERSONNALISATION AVANCÉE
+• Sélection des métriques à inclure
+• Format de date et notation numérique
+• Langue du rapport (français par défaut)
+• En-têtes personnalisés pour institution
+
+9.3 IMPRESSION DIRECTE
+----------------------
+
+IMPRESSION GLOBALE
+• Bouton "Imprimer" dans la barre supérieure
+• Capture de l'écran complet avec tous les panneaux actifs
+• Optimisation automatique pour format A4/Letter
+• Préservation des couleurs et contrastes
+
+IMPRESSION SÉLECTIVE
+• Bouton "Imprimer" sur chaque graphique individuel
+• Titre automatique avec métadonnées
+• Format optimisé pour insertion dans rapports
+• Légendes et axes clairement lisibles
+
+9.4 INTÉGRATION DANS RAPPORTS CLINIQUES
+----------------------------------------
+
+WORKFLOW RECOMMANDÉ
+1. Analyse complète dans l'application
+2. Export du rapport texte automatique
+3. Export des graphiques clés en haute résolution
+4. Intégration dans template de rapport institutionnel
+5. Ajout des conclusions cliniques personnalisées
+
+ÉLÉMENTS STANDARDS À INCLURE
+• Graphique RSB principal avec intervalles de confiance
+• Tableau de statistiques par niveau RSB
+• Analyse phonétique si pertinente cliniquement
+• Comparaisons si plusieurs participants
+• Métadonnées de test (date, conditions, protocole)
+
+9.5 ARCHIVAGE ET TRAÇABILITÉ
+-----------------------------
+
+DOCUMENTATION AUTOMATIQUE
+• Horodatage de toutes les analyses
+• Version de l'application utilisée
+• Paramètres d'analyse appliqués
+• Intégrité des données vérifiée
+
+CONFORMITÉ RÉGLEMENTAIRE
+• Respect des normes de données médicales
+• Anonymisation configurable
+• Audit trail pour recherche clinique
+• Compatibilité RGPD (données personnelles)
+
+[EMPLACEMENT CAPTURE D'ÉCRAN 14 : Panneau d'export avec options détaillées]
+[EMPLACEMENT CAPTURE D'ÉCRAN 15 : Exemple de rapport généré formaté]
+
+================================================================================
+10. INTERPRÉTATION SCIENTIFIQUE DES RÉSULTATS
+================================================================================
+
+10.1 MÉTRIQUES FONDAMENTALES
+-----------------------------
+
+RSB@50% (SEUIL DE RECONNAISSANCE VOCALE)
+• Valeur normale : -3 à +3 dB pour adultes jeunes
+• Presbyacousie : décalage vers valeurs positives (+5 à +15 dB)
+• Surdité neurosensorielle : forte dégradation (>+15 dB)
+• Prothèses auditives : amélioration variable selon technologie
+
+PENTE DE LA COURBE RSB
+• Normale : 7-15%/dB (pente raide = discrimination fine)
+• Pathologique : <5%/dB (pente douce = discrimination altérée)
+• Applications : évaluation du bénéfice prothétique
+
+PLATEAU MAXIMAL
+• Normal : >95% en conditions optimales (RSB élevé)
+• Plafonnement : indicateur de limitations centrales
+• Asymptote : performance maximale atteignable
+
+10.2 PATTERNS PATHOLOGIQUES TYPIQUES
+-------------------------------------
+
+PRESBYACOUSIE (VIEILLISSEMENT AUDITIF)
+• Décalage du RSB@50% vers valeurs positives
+• Pente préservée mais décalée
+• Dégradation préférentielle des hautes fréquences
+• Variabilité inter-individuelle importante
+
+SURDITÉ NEUROSENSORIELLE
+• RSB@50% très dégradé (>+15 dB)
+• Pente réduite (discrimination altérée)
+• Plateau abaissé (<90%)
+• Recrutement possible (pente anormalement raide)
+
+NEUROPATHIE AUDITIVE
+• RSB@50% très variable selon synchronisation
+• Pente très faible (<3%/dB)
+• Performance fluctuante
+• Disjonction audiométrie tonale/vocale
+
+TROUBLE DU TRAITEMENT AUDITIF CENTRAL
+• RSB@50% normal ou légèrement dégradé
+• Variabilité temporelle élevée
+• Fatigue auditive (dégradation progressive)
+• Asymétrie inter-auriculaire
+
+10.3 ANALYSE PHONÉTIQUE DIFFÉRENTIELLE
+---------------------------------------
+
+SURDITÉ DE TRANSMISSION
+• Atténuation globale équilibrée
+• Confusions par masquage énergétique
+• Préservation relative des traits phonétiques
+• Amélioration avec amplification simple
+
+SURDITÉ NEUROSENSORIELLE
+• Confusions spécifiques selon fréquences atteintes
+• Hautes fréquences : /s/-/f/, /t/-/k/ dégradées
+• Basses fréquences : voyelles confondues
+• Distorsion des traits phonétiques fins
+
+IMPLANT COCHLÉAIRE
+• Confusions liées aux limitations spectrales
+• Voisement préservé (information temporelle)
+• Lieu d'articulation difficile (résolution fréquentielle)
+• Amélioration progressive avec adaptation
+
+10.4 CORRÉLATIONS AVEC AUTRES MESURES
+--------------------------------------
+
+AUDIOMÉTRIE TONALE
+• Corrélation modérée avec moyennes tonales
+• Prédiction limitée par les effets de masquage
+• Importance des seuils haute fréquence (2-8 kHz)
+
+IMAGERIE CÉRÉBRALE
+• Activation différentielle selon RSB
+• Effort d'écoute mesurable (fMRI, EEG)
+• Plasticité et compensation centrale
+
+TESTS COGNITIFS
+• Corrélation avec mémoire de travail
+• Influence de l'attention sélective
+• Déclin cognitif et performances RSB
+
+10.5 APPLICATIONS CLINIQUES SPÉCIALISÉES
+-----------------------------------------
+
+ADAPTATION PROTHÉTIQUE
+• Prédiction du bénéfice attendu
+• Optimisation des réglages fréquentiels
+• Suivi objectif des progrès
+
+RÉHABILITATION AUDITIVE
+• Identification des cibles thérapeutiques
+• Personnalisation des exercices
+• Mesure objective des progrès
+
+RECHERCHE PHARMACOLOGIQUE
+• Évaluation de neuroprotecteurs
+• Suivi d'essais thérapeutiques
+• Biomarqueurs auditifs fonctionnels
+
+[EMPLACEMENT CAPTURE D'ÉCRAN 16 : Exemples de courbes pathologiques annotées]
+[EMPLACEMENT CAPTURE D'ÉCRAN 17 : Corrélations avec autres mesures cliniques]
+
+================================================================================
+11. DÉPANNAGE ET RÉSOLUTION DE PROBLÈMES
+================================================================================
+
+11.1 PROBLÈMES DE CONNEXION
+----------------------------
+
+SYMPTÔMES : "Erreur de connexion au serveur" / Statut rouge
+CAUSES POSSIBLES :
+• Serveur backend non démarré
+• Port 3100 occupé ou bloqué
+• Configuration réseau/firewall
+• Base de données Supabase inaccessible
+
+SOLUTIONS :
+1. Vérifier le serveur backend :
+   - Ouvrir terminal dans dossier /back
+   - Lancer : node server.js
+   - Vérifier message "Serveur démarré sur port 3100"
+
+2. Tester la connectivité :
+   - Ouvrir http://localhost:3100 dans navigateur
+   - Doit afficher message de statut du serveur
+
+3. Configuration firewall :
+   - Autoriser port 3100 en entrée/sortie
+   - Désactiver temporairement pour test
+
+4. Mode dégradé :
+   - Utiliser exclusivement mode "Fichiers"
+   - Fonctionnalités locales conservées
+
+11.2 ERREURS DE TRAITEMENT DE FICHIERS
+---------------------------------------
+
+"FORMAT DE FICHIER NON RECONNU"
+Causes : Extension incorrecte, fichier corrompu
+Solutions :
+• Vérifier extension (.csv, .xlsx, .xls)
+• Réenregistrer depuis Excel en CSV UTF-8
+• Contrôler taille fichier (<10 MB recommandé)
+
+"CHAMPS OBLIGATOIRES MANQUANTS"
+Causes : Structure de données incorrecte
+Solutions :
+• Vérifier présence des colonnes requises
+• Consulter exemple de fichier fourni
+• Respecter nomenclature exacte des champs
+
+"DONNÉES INSUFFISANTES"
+Causes : Trop peu de points de mesure
+Solutions :
+• Minimum 3 niveaux RSB différents
+• Au moins 5 mots par niveau RSB
+• Vérifier intégrité des données temporelles
+
+"ERREUR DE PARSING"
+Causes : Format numérique, encodage, séparateurs
+Solutions :
+• CSV : utiliser virgule comme séparateur
+• Nombres : point décimal (pas virgule)
+• Encodage : UTF-8 obligatoire pour CSV
+• Cellules vides : remplacer par valeurs appropriées
+
+11.3 PROBLÈMES D'AFFICHAGE
+---------------------------
+
+GRAPHIQUES NON AFFICHÉS
+Causes : JavaScript désactivé, navigateur obsolète
+Solutions :
+• Activer JavaScript dans navigateur
+• Mettre à jour navigateur (Chrome 90+, Firefox 88+)
+• Vider cache navigateur (Ctrl+F5)
+• Tester en navigation privée
+
+INTERFACE DÉFORMÉE
+Causes : Résolution écran, zoom navigateur
+Solutions :
+• Ajuster zoom navigateur (100% recommandé)
+• Résolution minimale : 1024x768
+• Responsive design : tester différentes tailles
+
+PERFORMANCES LENTES
+Causes : Trop de données, mémoire insuffisante
+Solutions :
+• Limiter à 5-10 participants simultanés
+• Fermer autres onglets navigateur
+• Redémarrer navigateur si fuite mémoire
+• Augmenter RAM système si possible
+
+11.4 PROBLÈMES D'EXPORT/IMPRESSION
+-----------------------------------
+
+EXPORT CSV VIDE
+Causes : Analyse non effectuée, erreur JavaScript
+Solutions :
+• Relancer analyse avant export
+• Vérifier console navigateur (F12)
+• Tester avec données simplifiées
+
+IMPRESSION INCOMPLÈTE
+Causes : Contenu dépassant page, CSS non chargé
+Solutions :
+• Utiliser impression par graphique individuel
+• Ajuster échelle d'impression (50-75%)
+• Mode paysage pour graphiques larges
+• Vérifier aperçu avant impression
+
+QUALITÉ GRAPHIQUE DÉGRADÉE
+Causes : Résolution insuffisante, compression
+Solutions :
+• Export SVG vectoriel plutôt que PNG
+• Augmenter résolution d'export (300 DPI)
+• Vérifier paramètres d'impression (haute qualité)
+
+11.5 SUPPORT ET ASSISTANCE
+---------------------------
+
+RESSOURCES DISPONIBLES
+• Documentation intégrée (tooltips explicatifs)
+• Exemples de fichiers dans dossier /examples
+• Console développeur pour diagnostics (F12)
+• Log serveur pour erreurs backend
+
+PROCÉDURE DE SIGNALEMENT
+1. Noter version application et navigateur
+2. Reproduire l'erreur de façon minimale
+3. Capturer message d'erreur exact
+4. Joindre fichier problématique si possible
+5. Contacter support avec informations complètes
+
+MISES À JOUR
+• Vérifier régulièrement nouvelles versions
+• Sauvegarder données avant mise à jour
+• Lire notes de version pour nouvelles fonctionnalités
+• Tester sur environnement de développement d'abord
+
+[EMPLACEMENT CAPTURE D'ÉCRAN 18 : Console de développement avec messages d'erreur]
+[EMPLACEMENT CAPTURE D'ÉCRAN 19 : Interface de statut système et diagnostics]
+
+================================================================================
+12. ANNEXES TECHNIQUES
+================================================================================
+
+12.1 SPÉCIFICATIONS TECHNIQUES DÉTAILLÉES
+------------------------------------------
+
+TECHNOLOGIES UTILISÉES
+• Frontend : React 18+ avec TypeScript
+• Graphiques : Recharts (basé sur D3.js)
+• Traitement données : JavaScript natif
+• Interface : Tailwind CSS + Lucide Icons
+• Build : Vite + ESLint
+
+PERFORMANCES SYSTÈME
+• Traitement : jusqu'à 10 000 mots/seconde
+• Mémoire : 50-200 MB selon données chargées
+• Stockage : cache navigateur < 10 MB
+• Réseau : 1-5 MB/s selon taille base données
+
+LIMITES TECHNIQUES
+• Participants simultanés : 50 recommandé, 200 maximum
+• Taille fichier : 100 MB maximum par upload
+• Niveaux RSB : 100 maximum par analyse
+• Mots par niveau : 1000 recommandé
+
+12.2 FORMAT DE DONNÉES DÉTAILLÉ
+--------------------------------
+
+EXEMPLE COMPLET DE FICHIER CSV :
+```
+person_name,age,test_date,rsbStart,rsbEnd,rsbStep,wordCnt,wordHist/0/word,wordHist/0/resp,wordHist/0/rsb,wordHist/0/beginningOfSpeechTime,wordHist/0/endOfSpeechTime,wordHist/1/word,wordHist/1/resp,wordHist/1/rsb,wordHist/1/beginningOfSpeechTime,wordHist/1/endOfSpeechTime
+"Participant_001",65,"2024-01-15",6,-14,-2,20,"chaise","chaise",6,1250,1890,"voiture","voiture",6,2100,2750
+```
+
+VALIDATION DES DONNÉES
+• Contrôles de cohérence automatiques
+• Détection valeurs aberrantes (Z-score > 3)
+• Vérification temporelle (temps négatifs, chevauchements)
+• Normalisation automatique des réponses (casse, espaces)
+
+12.3 ALGORITHMES DE CALCUL
+---------------------------
+
+INTERPOLATION RSB
+• Méthode : interpolation linéaire par morceaux
+• Grille commune : pas de 1 dB par défaut
+• Extrapolation : limitée à ±2 dB des mesures
+
+STATISTIQUES DESCRIPTIVES
+• Moyenne : arithmétique simple
+• Écart-type : formule de Bessel (n-1)
+• Intervalles de confiance : distribution t-Student
+• Tests significativité : t-test de Student, ANOVA
+
+ANALYSE PHONÉTIQUE
+• Transcription : dictionnaire français 5000 mots
+• Alignement : algorithme Needleman-Wunsch modifié
+• Distance : métrique pondérée traits distinctifs
+• Catégorisation : classification phonétique standard
+
+12.4 ÉQUATIONS MATHÉMATIQUES
+-----------------------------
+
+RSB@50% (Interpolation linéaire)
+Si y₁ < 50% < y₂ pour RSB₁ et RSB₂ :
+RSB@50% = RSB₁ + (50% - y₁) × (RSB₂ - RSB₁) / (y₂ - y₁)
+
+Intervalle de confiance (95%)
+IC₉₅% = moyenne ± t₀.₀₂₅(n-1) × (écart-type / √n)
+
+Distance phonétique pondérée
+d(p₁,p₂) = Σᵢ wᵢ × |trait_i(p₁) - trait_i(p₂)|
+où wᵢ = poids du trait i (lieu, mode, voisement...)
+
+12.5 RÉFÉRENCES SCIENTIFIQUES
+------------------------------
+
+STANDARDS INTERNATIONAUX
+• IEC 60268-16:2020 : Méthodes de mesure audiométrie vocale
+• ANSI S3.2-2019 : Méthodes d'évaluation de la parole
+• ISO 8253-3:2012 : Tests d'audiométrie vocale
+
+PUBLICATIONS DE RÉFÉRENCE
+• Plomp & Mimpen (1979) : Méthode SRT dans le bruit
+• Nilsson et al. (1994) : Test HINT (Hearing in Noise Test)
+• Killion et al. (2004) : Quick SIN test
+• Wilson et al. (2007) : Words-in-Noise test
+
+ÉQUATIONS DE PRÉDICTION
+• Articulation Index (AI) : Fletcher & Galt (1950)
+• Speech Intelligibility Index (SII) : ANSI S3.5-1997
+• Extended Speech Intelligibility Index : Rhebergen et al. (2006)
+
+================================================================================
+                                FIN DU DOCUMENT
+================================================================================
+
+© 2024 - Analyseur RSB - Mode d'emploi version 1.0
+Document généré automatiquement - Contenu scientifique validé
+Pour support technique : consulter interface application ou documentation en ligne
+
+Total pages : 23
+Emplacements captures d'écran : 19 prévus
+Format impression : A4 portrait recommandé
+Encodage : UTF-8

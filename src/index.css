@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Impression ciblée d'une section (activée seulement si body a la classe print-target-active) */
+@media print {
+  body.print-target-active * { visibility: hidden !important; }
+  body.print-target-active .print-target, body.print-target-active .print-target * { visibility: visible !important; }
+  body.print-target-active .print-target { position: fixed; left: 0; top: 0; width: 100%; }
+  @page { margin: 12mm; }
+}
