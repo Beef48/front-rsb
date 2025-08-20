@@ -86,7 +86,7 @@ export function PhoneticDetailAnalysis({ rsbData, personName, onClose }: Phoneti
   const [activeTab, setActiveTab] = useState<'overview' | 'details' | 'errors' | 'export'>('overview');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterErrorType, setFilterErrorType] = useState<'all' | 'substitution' | 'insertion' | 'deletion'>('all');
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(true);
 
   // Analyse détaillée de tous les mots
   const detailedAnalysis = useMemo((): DetailedWordAnalysis[] => {
@@ -291,13 +291,13 @@ export function PhoneticDetailAnalysis({ rsbData, personName, onClose }: Phoneti
   };
 
   return (
-    <div className={`fixed inset-0 bg-black bg-opacity-50 z-50 ${
-      isFullscreen ? 'p-0' : 'p-4 flex items-center justify-center'
+    <div className={`fixed inset-0 bg-white z-50 ${
+      isFullscreen ? 'overflow-y-auto' : 'bg-black bg-opacity-50 p-4 flex items-center justify-center overflow-hidden'
     }`}>
-      <div className={`bg-white shadow-2xl w-full overflow-hidden transition-all duration-300 ${
+      <div className={`bg-white shadow-2xl w-full transition-all duration-300 ${
         isFullscreen 
-          ? 'h-full max-w-none rounded-none' 
-          : 'rounded-xl max-w-7xl max-h-[90vh]'
+          ? 'min-h-full max-w-none rounded-none' 
+          : 'rounded-xl max-w-7xl max-h-[90vh] overflow-hidden'
       }`}>
         {/* Header */}
         <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6">
@@ -419,10 +419,10 @@ export function PhoneticDetailAnalysis({ rsbData, personName, onClose }: Phoneti
         </div>
 
         {/* Contenu */}
-        <div className={`p-6 overflow-y-auto ${
+        <div className={`p-6 ${
           isFullscreen 
-            ? 'max-h-[calc(100vh-200px)]' 
-            : 'max-h-[calc(95vh-200px)]'
+            ? '' 
+            : 'overflow-y-auto max-h-[calc(95vh-200px)]'
         }`}>
           {activeTab === 'overview' && (
             <div className="space-y-8">
