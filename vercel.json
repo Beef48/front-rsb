@@ -3,11 +3,6 @@
   "outputDirectory": "public",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
-  "functions": {
-    "src/api/[...path].ts": {
-      "maxDuration": 30
-    }
-  },
   "rewrites": [
     {
       "source": "/api/(.*)",
