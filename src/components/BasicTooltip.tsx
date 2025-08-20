@@ -20,48 +20,63 @@ export function BasicTooltip({ content, children, className = '' }: BasicTooltip
     const tooltipRect = tooltipRef.current.getBoundingClientRect();
     const viewportHeight = window.innerHeight;
     const viewportWidth = window.innerWidth;
-    const scrollY = window.scrollY;
-    const scrollX = window.scrollX;
 
-    const MARGIN = 16;
+    const MARGIN = 20;
     const OFFSET = 8;
 
-    // Position par défaut : à droite de l'icône
-    let left = triggerRect.right + scrollX + OFFSET;
-    let top = triggerRect.top + scrollY;
-    let showAbove = true;
-
-    // Vérifier le débordement horizontal
-    const tooltipWidth = tooltipRect.width || 250;
-    
-    // Si débordement à droite, placer à gauche de l'icône
-    if (left + tooltipWidth > viewportWidth - MARGIN) {
-      left = triggerRect.left + scrollX - tooltipWidth - OFFSET;
-    }
-    
-    // Si encore débordement à gauche, centrer sous l'icône
-    if (left < MARGIN) {
-      left = triggerRect.left + scrollX + (triggerRect.width / 2) - (tooltipWidth / 2);
-      top = triggerRect.bottom + scrollY + OFFSET;
-      showAbove = false;
-      
-      // Ajuster si débordement horizontal en mode centré
-      if (left < MARGIN) left = MARGIN;
-      if (left + tooltipWidth > viewportWidth - MARGIN) {
-        left = viewportWidth - tooltipWidth - MARGIN;
-      }
-    }
-
-    // Vérifier le débordement vertical
+    // Dimensions du tooltip
+    const tooltipWidth = Math.min(320, tooltipRect.width || 250);
     const tooltipHeight = tooltipRect.height || 80;
-    
-    // Si débordement en bas et pas déjà en mode "en dessous"
-    if (showAbove && top + tooltipHeight > viewportHeight + scrollY - MARGIN) {
-      top = triggerRect.bottom + scrollY + OFFSET;
+
+    // Calculer l'espace disponible dans chaque direction
+    const spaceRight = viewportWidth - triggerRect.right;
+    const spaceLeft = triggerRect.left;
+    const spaceBelow = viewportHeight - triggerRect.bottom;
+    const spaceAbove = triggerRect.top;
+
+    let left, top, showAbove = true;
+
+    // Logique de positionnement prioritaire
+    // 1. En bas à droite si assez de place
+    if (spaceBelow >= tooltipHeight + MARGIN && spaceRight >= tooltipWidth + MARGIN) {
+      left = triggerRect.right + OFFSET;
+      top = triggerRect.bottom + OFFSET;
+      showAbove = false;
+    }
+    // 2. En bas à gauche si pas de place à droite
+    else if (spaceBelow >= tooltipHeight + MARGIN && spaceLeft >= tooltipWidth + MARGIN) {
+      left = triggerRect.left - tooltipWidth - OFFSET;
+      top = triggerRect.bottom + OFFSET;
+      showAbove = false;
+    }
+    // 3. En haut à droite si pas de place en bas
+    else if (spaceAbove >= tooltipHeight + MARGIN && spaceRight >= tooltipWidth + MARGIN) {
+      left = triggerRect.right + OFFSET;
+      top = triggerRect.top - tooltipHeight - OFFSET;
+      showAbove = true;
+    }
+    // 4. En haut à gauche
+    else if (spaceAbove >= tooltipHeight + MARGIN && spaceLeft >= tooltipWidth + MARGIN) {
+      left = triggerRect.left - tooltipWidth - OFFSET;
+      top = triggerRect.top - tooltipHeight - OFFSET;
+      showAbove = true;
+    }
+    // 5. Centré en bas (fallback)
+    else {
+      left = Math.max(MARGIN, Math.min(
+        triggerRect.left + (triggerRect.width / 2) - (tooltipWidth / 2),
+        viewportWidth - tooltipWidth - MARGIN
+      ));
+      top = triggerRect.bottom + OFFSET;
       showAbove = false;
     }
 
-    setPosition({ top, left, showAbove });
+    // Convertir en coordonnées absolues pour le positionnement fixed
+    setPosition({ 
+      top: top + window.scrollY, 
+      left: left + window.scrollX, 
+      showAbove 
+    });
   };
 
   const handleClick = (event: React.MouseEvent) => {
@@ -125,21 +140,32 @@ export function BasicTooltip({ content, children, className = '' }: BasicTooltip
       {show && (
         <div
           ref={tooltipRef}
-          className="fixed bg-white border border-gray-200 text-gray-800 text-sm px-4 py-3 rounded-lg shadow-xl z-[9999] leading-relaxed"
+          className="fixed bg-white border border-gray-300 text-gray-800 text-sm px-3 py-2 rounded-lg shadow-2xl z-[9999] leading-snug"
           style={{
             top: `${position.top}px`,
             left: `${position.left}px`,
             maxWidth: '320px',
-            minWidth: '200px',
+            minWidth: '180px',
             whiteSpace: 'normal',
             wordWrap: 'break-word',
-            lineHeight: '1.5'
+            lineHeight: '1.4'
           }}
         >
           <div className="flex items-start gap-2">
-            <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-            <div>{content}</div>
+            <Info className="w-3.5 h-3.5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <div className="text-xs">{content}</div>
           </div>
+          {/* Bouton de fermeture optionnel */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShow(false);
+            }}
+            className="absolute top-1 right-1 text-gray-400 hover:text-gray-600 w-4 h-4 flex items-center justify-center text-xs"
+            title="Fermer"
+          >
+            ×
+          </button>
         </div>
       )}
     </>
