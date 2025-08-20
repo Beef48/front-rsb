@@ -8,14 +8,14 @@ interface BasicTooltipProps {
 
 export function BasicTooltip({ content, children, className = '' }: BasicTooltipProps) {
   const [show, setShow] = useState(false);
-  const [position, setPosition] = useState({ top: 0, left: 0, showAbove: true, arrowOffset: 50 });
+  const [position, setPosition] = useState({ top: 0, left: 0, showAbove: true });
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const triggerRef = useRef<HTMLSpanElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   const calculatePosition = () => {
-    if (!triggerRef.current || !tooltipRef.current) return;
+    if (!tooltipRef.current) return;
 
-    const triggerRect = triggerRef.current.getBoundingClientRect();
     const tooltipRect = tooltipRef.current.getBoundingClientRect();
     const viewportHeight = window.innerHeight;
     const viewportWidth = window.innerWidth;
@@ -23,61 +23,51 @@ export function BasicTooltip({ content, children, className = '' }: BasicTooltip
     const scrollX = window.scrollX;
 
     const MARGIN = 16; // Marge de sécurité
-    const TOOLTIP_MAX_WIDTH = 320;
+    const OFFSET = 12; // Distance par rapport à la souris
     
-    // Position horizontale : centré par défaut, mais ajusté si ça dépasse
-    const triggerCenterX = triggerRect.left + scrollX + (triggerRect.width / 2);
+    // Position basée sur la souris
+    let left = mousePosition.x + scrollX + OFFSET;
+    let top = mousePosition.y + scrollY - OFFSET;
+    let showAbove = true;
+
+    // Vérifier le débordement horizontal
+    const tooltipWidth = tooltipRect.width || 200;
     
-    // Vérifier le débordement horizontal avec la vraie largeur du tooltip
-    const actualTooltipWidth = Math.min(TOOLTIP_MAX_WIDTH, tooltipRect.width || 200);
-    
-    // Centrer le tooltip horizontalement sur l'élément déclencheur
-    let left = triggerCenterX - (actualTooltipWidth / 2);
-    
-    // Calculer le décalage de la flèche si le tooltip doit être déplacé
-    let arrowOffset = 50; // Centré par défaut (50%)
-    
-    // Ajuster si débordement à gauche
-    if (left < MARGIN) {
-      const shift = MARGIN - left;
-      left = MARGIN;
-      // Calculer le nouveau pourcentage pour la flèche
-      arrowOffset = ((triggerCenterX - MARGIN) / actualTooltipWidth) * 100;
-      arrowOffset = Math.max(10, Math.min(90, arrowOffset)); // Limiter entre 10% et 90%
+    // Si débordement à droite, placer à gauche de la souris
+    if (left + tooltipWidth > viewportWidth - MARGIN) {
+      left = mousePosition.x + scrollX - tooltipWidth - OFFSET;
     }
-    // Ajuster si débordement à droite
-    else if (left + actualTooltipWidth > viewportWidth - MARGIN) {
-      const newLeft = viewportWidth - actualTooltipWidth - MARGIN;
-      // Calculer le nouveau pourcentage pour la flèche
-      arrowOffset = ((triggerCenterX - newLeft) / actualTooltipWidth) * 100;
-      arrowOffset = Math.max(10, Math.min(90, arrowOffset)); // Limiter entre 10% et 90%
-      left = newLeft;
+    
+    // Si encore débordement à gauche, forcer dans la fenêtre
+    if (left < MARGIN) {
+      left = MARGIN;
     }
 
-    // Position verticale : calculer l'espace disponible au-dessus et en dessous
-    const spaceAbove = triggerRect.top;
-    const spaceBelow = viewportHeight - triggerRect.bottom;
-    const tooltipHeight = tooltipRect.height || 60; // Estimation si pas encore rendu
+    // Vérifier le débordement vertical
+    const tooltipHeight = tooltipRect.height || 60;
     
-    let top;
-    let showAbove;
-    
-    // Préférer placer au-dessus si il y a assez de place, sinon en dessous
-    if (spaceAbove >= tooltipHeight + MARGIN && spaceAbove >= spaceBelow) {
-      // Au-dessus
-      top = triggerRect.top + scrollY - MARGIN;
-      showAbove = true;
-    } else {
-      // En dessous
-      top = triggerRect.bottom + scrollY + MARGIN;
+    // Si débordement en haut, placer en dessous de la souris
+    if (top < MARGIN) {
+      top = mousePosition.y + scrollY + OFFSET;
       showAbove = false;
     }
+    
+    // Si débordement en bas, placer au-dessus de la souris
+    if (top + tooltipHeight > viewportHeight + scrollY - MARGIN) {
+      top = mousePosition.y + scrollY - tooltipHeight - OFFSET;
+      showAbove = true;
+    }
 
-    setPosition({ top, left, showAbove, arrowOffset });
+    setPosition({ top, left, showAbove });
   };
 
-  const handleMouseEnter = () => {
+  const handleMouseEnter = (event: React.MouseEvent) => {
+    setMousePosition({ x: event.clientX, y: event.clientY });
     setShow(true);
+  };
+
+  const handleMouseMove = (event: React.MouseEvent) => {
+    setMousePosition({ x: event.clientX, y: event.clientY });
   };
 
   const handleMouseLeave = () => {
@@ -86,9 +76,12 @@ export function BasicTooltip({ content, children, className = '' }: BasicTooltip
 
   useEffect(() => {
     if (show) {
-      // Petit délai pour que le tooltip soit rendu avant de calculer la position
-      const timer = setTimeout(calculatePosition, 10);
-      
+      calculatePosition();
+    }
+  }, [show, mousePosition]);
+
+  useEffect(() => {
+    if (show) {
       // Recalculer la position lors du scroll ou redimensionnement
       const handleScroll = () => calculatePosition();
       const handleResize = () => calculatePosition();
@@ -97,7 +90,6 @@ export function BasicTooltip({ content, children, className = '' }: BasicTooltip
       window.addEventListener('resize', handleResize, { passive: true });
       
       return () => {
-        clearTimeout(timer);
         window.removeEventListener('scroll', handleScroll);
         window.removeEventListener('resize', handleResize);
       };
@@ -110,6 +102,7 @@ export function BasicTooltip({ content, children, className = '' }: BasicTooltip
         ref={triggerRef}
         className={`cursor-help border-b border-dotted border-gray-400 hover:border-gray-600 ${className}`}
         onMouseEnter={handleMouseEnter}
+        onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
         {children}
@@ -122,7 +115,6 @@ export function BasicTooltip({ content, children, className = '' }: BasicTooltip
           style={{
             top: `${position.top}px`,
             left: `${position.left}px`,
-            transform: position.showAbove ? 'translateY(-100%)' : 'translateY(0)',
             maxWidth: '320px',
             minWidth: '200px',
             whiteSpace: 'normal',
@@ -131,19 +123,6 @@ export function BasicTooltip({ content, children, className = '' }: BasicTooltip
           }}
         >
           {content}
-          <div 
-            className={`absolute border-4 border-transparent ${
-              position.showAbove 
-                ? 'top-full border-t-gray-900' 
-                : 'bottom-full border-b-gray-900'
-            }`}
-            style={{ 
-              left: `${position.arrowOffset}%`,
-              transform: 'translateX(-50%)',
-              marginTop: position.showAbove ? '-1px' : undefined,
-              marginBottom: position.showAbove ? undefined : '-1px'
-            }}
-          ></div>
         </div>
       )}
     </>
