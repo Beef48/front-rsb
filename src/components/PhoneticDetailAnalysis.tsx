@@ -28,9 +28,7 @@ import {
   Volume2,
   TrendingUp,
   Filter,
-  Search,
-  Maximize2,
-  Minimize2
+  Search
 } from 'lucide-react';
 import { RSBData, WordTest, PhonemeError } from '../types';
 import { 
@@ -310,17 +308,6 @@ export function PhoneticDetailAnalysis({ rsbData, personName, onClose }: Phoneti
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <button
-                onClick={() => setIsFullscreen(!isFullscreen)}
-                className="text-white hover:text-gray-200 p-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition-all"
-                title={isFullscreen ? "Réduire la fenêtre" : "Agrandir en plein écran"}
-              >
-                {isFullscreen ? (
-                  <Minimize2 className="w-5 h-5" />
-                ) : (
-                  <Maximize2 className="w-5 h-5" />
-                )}
-              </button>
               <button
                 onClick={onClose}
                 className="text-white hover:text-gray-200 text-2xl font-bold p-1"
