@@ -421,19 +421,21 @@ export function PhoneticDetailAnalysis({ rsbData, personName, onClose }: Phoneti
         {/* Contenu */}
         <div className={`p-6 overflow-y-auto ${
           isFullscreen 
-            ? 'max-h-[calc(100vh-300px)]' 
-            : 'max-h-[calc(90vh-300px)]'
+            ? 'max-h-[calc(100vh-200px)]' 
+            : 'max-h-[calc(95vh-200px)]'
         }`}>
           {activeTab === 'overview' && (
-            <div className="space-y-6">
+            <div className="space-y-8">
               {/* Graphique précision par RSB */}
               <div className="bg-white border rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-6">
                   <BasicTooltip content="Évolution de la précision phonétique selon le niveau de bruit (RSB). Montre comment la perception des phonèmes se dégrade quand le bruit augmente. Une chute importante indique des difficultés auditives dans le bruit.">
                     <span>Précision phonétique par niveau RSB</span>
                   </BasicTooltip>
                 </h3>
-                <div className="h-64">
+                <div className={`${
+                  isFullscreen ? 'h-80' : 'h-72'
+                }`}>
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={rsbChartData}>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -466,23 +468,25 @@ export function PhoneticDetailAnalysis({ rsbData, personName, onClose }: Phoneti
                 </div>
               </div>
 
-              {/* Graphiques types d'erreurs */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Graphiques types d'erreurs - Layout amélioré */}
+              <div className="space-y-8">
                 {/* Types d'erreurs */}
                 <div className="bg-white border rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-6">
                     <BasicTooltip content="Distribution des types d'erreurs phonétiques : substitutions (son remplacé), insertions (son ajouté) et omissions (son manqué). Révèle les patterns d'erreurs spécifiques du participant.">
                       <span>Répartition des types d'erreurs</span>
                     </BasicTooltip>
                   </h3>
-                  <div className="h-64">
+                  <div className={`${
+                    isFullscreen ? 'h-80' : 'h-72'
+                  }`}>
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
                           data={errorTypeData}
                           cx="50%"
                           cy="50%"
-                          outerRadius={80}
+                          outerRadius={isFullscreen ? 120 : 100}
                           dataKey="value"
                           label={({ name, value, percent }) => 
                             `${name}: ${value} (${(percent * 100).toFixed(1)}%)`
@@ -500,12 +504,14 @@ export function PhoneticDetailAnalysis({ rsbData, personName, onClose }: Phoneti
 
                 {/* Erreurs par position */}
                 <div className="bg-white border rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-6">
                     <BasicTooltip content="Localisation des erreurs dans les mots : début (33% initial), milieu (33% central), fin (33% final). Indique si certaines positions sont plus problématiques, révélant des patterns de perception auditive.">
                       <span>Erreurs par position dans le mot</span>
                     </BasicTooltip>
                   </h3>
-                  <div className="h-64">
+                  <div className={`${
+                    isFullscreen ? 'h-80' : 'h-72'
+                  }`}>
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={positionErrorData}>
                         <CartesianGrid strokeDasharray="3 3" />
