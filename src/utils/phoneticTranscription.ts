@@ -157,6 +157,14 @@ const FRENCH_PHONETIC_DICT: { [key: string]: string[] } = {
   'fit': ['f', 'i'],
   'kit': ['k', 'i', 't'],
   
+  // Variantes d'accents normalisées
+  'pere': ['p', 'ɛ', 'ʁ'],  // père sans accent
+  'mere': ['m', 'ɛ', 'ʁ'],  // mère sans accent
+  'frere': ['f', 'ʁ', 'ɛ', 'ʁ'], // frère sans accent
+  'fete': ['f', 'ɛ', 't'],  // fête sans accent
+  'tete': ['t', 'ɛ', 't'],  // tête sans accent
+  'bete': ['b', 'ɛ', 't'],  // bête sans accent
+  
   // Consonnes + voyelles courantes
   'ba': ['b', 'a'],
   'da': ['d', 'a'],
@@ -169,7 +177,6 @@ const FRENCH_PHONETIC_DICT: { [key: string]: string[] } = {
   'za': ['z', 'a'],
   'ja': ['ʒ', 'a'],
   'ra': ['ʁ', 'a'],
-  'la': ['l', 'a'],
   'sa': ['s', 'a'],
   'cha': ['ʃ', 'a'],
   'fa': ['f', 'a'],
@@ -215,17 +222,53 @@ const FRENCH_PHONETIC_DICT: { [key: string]: string[] } = {
   'glo': ['g', 'l', 'o'],
 };
 
+// Articles à ignorer dans l'analyse phonétique
+const ARTICLES_TO_IGNORE = ['le', 'la', 'les', 'un', 'une', 'des', 'du', 'de', 'l\'', 'd\''];
+
+// Fonction de normalisation des mots avant analyse phonétique
+export function normalizeWordForPhoneticAnalysis(word: string): string {
+  let normalized = word.toLowerCase().trim();
+  
+  // Supprimer la ponctuation
+  normalized = normalized.replace(/[.,;:!?'"()\-]/g, '');
+  
+  // Normaliser les accents - traiter é comme e, è comme e, etc.
+  normalized = normalized
+    .replace(/[éèêë]/g, 'e')
+    .replace(/[àâä]/g, 'a')
+    .replace(/[îï]/g, 'i')
+    .replace(/[ôö]/g, 'o')
+    .replace(/[ùûü]/g, 'u')
+    .replace(/[ÿ]/g, 'y')
+    .replace(/[ç]/g, 'c')
+    .replace(/[ñ]/g, 'n');
+  
+  // Diviser en mots pour traiter les articles
+  const words = normalized.split(/\s+/).filter(w => w.length > 0);
+  
+  // Filtrer les articles
+  const filteredWords = words.filter(w => !ARTICLES_TO_IGNORE.includes(w));
+  
+  // Si tous les mots sont des articles, garder le dernier
+  if (filteredWords.length === 0 && words.length > 0) {
+    return words[words.length - 1];
+  }
+  
+  // Retourner le premier mot non-article (ou le mot unique)
+  return filteredWords.length > 0 ? filteredWords[0] : normalized;
+}
+
 // Règles de transcription phonétique simplifiées
 export function transcribeToPhonemes(word: string): string[] {
-  const cleanWord = word.toLowerCase().trim();
+  const normalizedWord = normalizeWordForPhoneticAnalysis(word);
   
   // Vérifier d'abord dans le dictionnaire
-  if (FRENCH_PHONETIC_DICT[cleanWord]) {
-    return FRENCH_PHONETIC_DICT[cleanWord];
+  if (FRENCH_PHONETIC_DICT[normalizedWord]) {
+    return FRENCH_PHONETIC_DICT[normalizedWord];
   }
   
   // Règles de transcription de base pour les mots non listés
-  return transcribeWithRules(cleanWord);
+  return transcribeWithRules(normalizedWord);
 }
 
 function transcribeWithRules(word: string): string[] {
@@ -437,5 +480,30 @@ export function testTranscription(): void {
   testWords.forEach(word => {
     const phonemes = transcribeToPhonemes(word);
     console.log(`${word} → [${phonemes.join(', ')}]`);
+  });
+}
+
+// Test de la normalisation avec articles et accents
+export function testNormalization(): void {
+  console.log('=== Test de normalisation ===');
+  const testCases = [
+    { input: 'le chat', expected: 'chat' },
+    { input: 'la maison', expected: 'maison' },
+    { input: 'les chiens', expected: 'chiens' },
+    { input: 'un pain', expected: 'pain' },
+    { input: 'une mère', expected: 'mere' },
+    { input: 'père', expected: 'pere' },
+    { input: 'été', expected: 'ete' },
+    { input: 'café', expected: 'cafe' },
+    { input: 'être', expected: 'etre' },
+    { input: 'élève', expected: 'eleve' },
+    { input: 'du pain', expected: 'pain' },
+    { input: 'des mots', expected: 'mots' }
+  ];
+  
+  testCases.forEach(testCase => {
+    const normalized = normalizeWordForPhoneticAnalysis(testCase.input);
+    const status = normalized === testCase.expected ? '✓' : '✗';
+    console.log(`${status} "${testCase.input}" → "${normalized}" (attendu: "${testCase.expected}")`);
   });
 }

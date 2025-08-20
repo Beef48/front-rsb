@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Search, CheckCircle, AlertCircle, Loader, Pencil } from 'lucide-react';
+import { Users, Search, CheckCircle, AlertCircle, Loader, Pencil, Trash2 } from 'lucide-react';
 import { Person, WordStats, ErrorStats } from '../services/api';
 import apiService from '../services/api';
 import AgeFilter from './AgeFilter';
@@ -10,9 +10,11 @@ interface PersonSelectorProps {
   onPersonsSelected: (persons: Person[]) => void;
   selectedPersons: Person[];
   onRemovePerson: (index: number) => void;
+  onShowSuccess?: (title: string, message?: string) => void;
+  onShowError?: (title: string, message?: string) => void;
 }
 
-export function PersonSelector({ onPersonsSelected, selectedPersons, onRemovePerson }: PersonSelectorProps) {
+export function PersonSelector({ onPersonsSelected, selectedPersons, onRemovePerson, onShowSuccess, onShowError }: PersonSelectorProps) {
   const [persons, setPersons] = useState<Person[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,6 +25,7 @@ export function PersonSelector({ onPersonsSelected, selectedPersons, onRemovePer
   const [ageFilter, setAgeFilter] = useState<{ min: number; max: number } | null>(null);
   const [editing, setEditing] = useState<Person | null>(null);
   const [selectedPathologies, setSelectedPathologies] = useState<string[]>([]);
+  const [deletingPersonId, setDeletingPersonId] = useState<number | string | null>(null);
 
   // Charger les personnes au montage du composant
   useEffect(() => {
@@ -118,6 +121,47 @@ export function PersonSelector({ onPersonsSelected, selectedPersons, onRemovePer
 
   const handleClearAll = () => {
     onPersonsSelected([]);
+  };
+
+  const handleDeletePerson = async (person: Person) => {
+    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer définitivement "${person.person_name}" de la base de données ?\n\nCette action est irréversible.`)) {
+      return;
+    }
+
+    setDeletingPersonId(person.id);
+    try {
+      await apiService.deletePerson(person.id);
+      
+      // Retirer la personne de la liste locale
+      setPersons(prev => prev.filter(p => p.id !== person.id));
+      
+      // Retirer la personne de la sélection si elle était sélectionnée
+      const updatedSelection = selectedPersons.filter(p => p.id !== person.id);
+      if (updatedSelection.length !== selectedPersons.length) {
+        onPersonsSelected(updatedSelection);
+      }
+      
+      // Afficher notification de succès
+      if (onShowSuccess) {
+        onShowSuccess(
+          'Utilisateur supprimé',
+          `${person.person_name} a été supprimé de la base de données`
+        );
+      }
+      
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      
+      // Afficher notification d'erreur
+      if (onShowError) {
+        onShowError(
+          'Erreur lors de la suppression',
+          error instanceof Error ? error.message : 'Une erreur est survenue lors de la suppression'
+        );
+      }
+    } finally {
+      setDeletingPersonId(null);
+    }
   };
 
   return (
@@ -292,6 +336,18 @@ export function PersonSelector({ onPersonsSelected, selectedPersons, onRemovePer
                     title="Modifier"
                   >
                     <Pencil className="w-4 h-4 text-gray-600" />
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDeletePerson(person); }}
+                    className={`p-2 rounded hover:bg-red-100 ${deletingPersonId === person.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    title="Supprimer définitivement"
+                    disabled={deletingPersonId === person.id}
+                  >
+                    {deletingPersonId === person.id ? (
+                      <Loader className="w-4 h-4 text-red-600 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-4 h-4 text-red-600" />
+                    )}
                   </button>
                   {isSelected && (
                     <CheckCircle className="w-5 h-5 text-primary-600 ml-1" />

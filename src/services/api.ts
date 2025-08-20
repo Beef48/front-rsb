@@ -23,10 +23,8 @@ function interpolateArray(xPoints: number[], yPoints: number[], xGrid: number[])
   });
 }
 
-// Configuration de l'API - test direct pour diagnostiquer le proxy
-const API_BASE_URL = import.meta.env.PROD 
-  ? 'https://back-4lagz8iwv-brunos-projects-0953a500.vercel.app'
-  : '/api';
+// Utilise le proxy Vite: toutes les requêtes partent vers /api et sont proxyées vers le backend
+const API_BASE_URL = '/api';
 
 export interface Person {
   id: number | string;
@@ -396,6 +394,17 @@ class ApiService {
       pathology: updated.pathologie ?? updates.pathology,
       comment: updated.commentaire ?? updates.comment,
     } as Person;
+  }
+
+  // Supprimer un participant
+  async deletePerson(id: number | string): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/persons/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      const text = await response.text().catch(() => '');
+      throw new Error(`Erreur lors de la suppression: ${response.status} ${text}`);
+    }
   }
 }
 

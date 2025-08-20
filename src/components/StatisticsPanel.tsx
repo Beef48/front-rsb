@@ -41,7 +41,7 @@ export function StatisticsPanel({ result }: StatisticsPanelProps) {
     },
     {
       icon: TrendingUp,
-      label: globalStats ? 'Moyenne globale' : 'Meilleur RSB',
+              label: globalStats ? 'Moyenne utilisateur' : 'Meilleur RSB',
       value: globalStats ? `${(globalStats.means.reduce((a, b) => a + b, 0) / globalStats.means.length).toFixed(1)}%` : `${bestRSB} dB (${bestPercentage.toFixed(1)}%)`,
       color: 'text-warning-600',
       bgColor: 'bg-warning-50'

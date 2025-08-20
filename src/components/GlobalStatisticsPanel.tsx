@@ -30,11 +30,11 @@ export function GlobalStatisticsPanel({ globalStatistics }: GlobalStatisticsPane
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Moyenne globale */}
+        {/* Moyenne utilisateur */}
         <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
           <div className="flex items-center space-x-2 mb-2">
             <TrendingUp className="w-5 h-5 text-blue-600" />
-            <span className="text-sm font-medium text-blue-800">Moyenne globale</span>
+            <span className="text-sm font-medium text-blue-800">Moyenne utilisateur</span>
           </div>
           <div className="text-2xl font-bold text-blue-900">
             {(globalStatistics.means.reduce((a, b) => a + b, 0) / globalStatistics.means.length).toFixed(1)}%

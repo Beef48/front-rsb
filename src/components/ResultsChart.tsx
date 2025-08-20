@@ -137,7 +137,7 @@ export function ResultsChart({ result, showIndividualCurves, showConfidenceInter
         color = '#1E40AF';
       } else if (key === 'globalMean' && useGlobalStats && globalStats) {
         value = computeRSBAt50(globalStats.rsbGrid, globalStats.means);
-        label = 'Moyenne globale';
+        label = 'Moyenne utilisateur';
         color = '#1E40AF';
       }
       setRsbInfo({ label, value, color, start: undefined, end: undefined, step: null, wordsPerLevel: null });
@@ -189,7 +189,7 @@ export function ResultsChart({ result, showIndividualCurves, showConfidenceInter
           <div className="flex flex-wrap gap-4">
           {useGlobalStats ? (
             <>
-              <span>• Moyenne globale en bleu</span>
+              <span>• Moyenne utilisateur en bleu</span>
               <span>• Limites de confiance globales (±σ)</span>
             </>
           ) : (
@@ -279,7 +279,7 @@ export function ResultsChart({ result, showIndividualCurves, showConfidenceInter
             <Tooltip
               formatter={(value, name) => {
                 if (name === 'average') return [`${Number(value).toFixed(1)}%`, 'Moyenne'];
-                if (name === 'globalMean') return [`${Number(value).toFixed(1)}%`, 'Moyenne globale'];
+                if (name === 'globalMean') return [`${Number(value).toFixed(1)}%`, 'Moyenne utilisateur'];
                 if (typeof name === 'string' && name.startsWith('file_')) {
                   const fileIndex = parseInt(name.split('_')[1]);
                   return [`${Number(value).toFixed(1)}%`, result.files[fileIndex]?.file || 'Fichier'];
@@ -362,7 +362,7 @@ export function ResultsChart({ result, showIndividualCurves, showConfidenceInter
               />
             ))}
 
-            {/* Courbe moyenne globale si disponible */}
+            {/* Courbe moyenne utilisateur si disponible */}
             {useGlobalStats && (
               <Line
                 type="monotone"
@@ -371,7 +371,7 @@ export function ResultsChart({ result, showIndividualCurves, showConfidenceInter
                 {...getLineBlinkProps('globalMean', 1, 3)}
                 dot={{ r: 5, fill: '#1E40AF' }}
                 connectNulls={false}
-                name="Moyenne globale"
+                name="Moyenne utilisateur"
               />
             )}
 

@@ -8,9 +8,11 @@ interface FileUploadProps {
   onFilesSelected: (files: File[]) => void;
   uploadStatuses: FileUploadStatus[];
   onRemoveFile: (index: number) => void;
+  onShowSuccess?: (title: string, message?: string) => void;
+  onShowError?: (title: string, message?: string) => void;
 }
 
-export function FileUpload({ onFilesSelected, uploadStatuses, onRemoveFile }: FileUploadProps) {
+export function FileUpload({ onFilesSelected, uploadStatuses, onRemoveFile, onShowSuccess, onShowError }: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error' | 'loading'>('idle');
   const [importMessage, setImportMessage] = useState<string | null>(null);
@@ -72,15 +74,39 @@ export function FileUpload({ onFilesSelected, uploadStatuses, onRemoveFile }: Fi
       if (allPersons.length === 0) {
         setImportStatus('error');
         setImportMessage('Aucun participant détecté dans le(s) fichier(s). Vérifiez le format ou le contenu.');
+        
+        // Afficher notification d'erreur
+        if (onShowError) {
+          onShowError(
+            'Aucun participant détecté',
+            'Vérifiez le format ou le contenu des fichiers uploadés'
+          );
+        }
         return;
       }
       const res = await apiService.importPersons(allPersons);
       setImportStatus('success');
       setImportMessage(res.message || `${res.count} participant(s) importé(s) avec succès !`);
       setSelectedFiles([]);
+      
+      // Afficher notification de succès
+      if (onShowSuccess) {
+        onShowSuccess(
+          'Utilisateurs ajoutés avec succès !',
+          res.message || `${res.count} participant(s) importé(s) dans la base de données`
+        );
+      }
     } catch (e: any) {
       setImportStatus('error');
       setImportMessage(e.message || 'Erreur lors de l\'import');
+      
+      // Afficher notification d'erreur
+      if (onShowError) {
+        onShowError(
+          'Erreur lors de l\'import',
+          e.message || 'Une erreur est survenue lors de l\'ajout des utilisateurs'
+        );
+      }
     }
   };
 

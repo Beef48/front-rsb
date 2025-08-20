@@ -24,6 +24,10 @@ export interface RSBData {
   totalExpected: number;
   wordTests: WordTest[]; // Nouveau : détails des mots testés
   statistics?: RSBStatistics; // Statistiques calculées par le backend
+  // Données d'écart-type pour l'utilisateur agrégé
+  standardDeviation?: number[];
+  confidenceInterval1?: { lower: number[]; upper: number[] }; // ±1σ
+  confidenceInterval2?: { lower: number[]; upper: number[] }; // ±2σ
 }
 
 export interface AnalysisResult {

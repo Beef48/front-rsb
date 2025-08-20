@@ -336,6 +336,196 @@ export function analyzePersonPhonetics(rsbData: RSBData): PhoneticAnalysisResult
   };
 }
 
+// Fonction pour créer une analyse phonétique agrégée de plusieurs participants
+export function createAggregatePhoneticAnalysis(analysisResults: PhoneticAnalysisResult[]): PhoneticAnalysisResult {
+  if (analysisResults.length === 0) {
+    throw new Error('Aucune analyse fournie pour l\'agrégation');
+  }
+
+  if (analysisResults.length === 1) {
+    return analysisResults[0];
+  }
+
+  // Collecter tous les niveaux RSB uniques
+  const allRsbLevels = [...new Set(
+    analysisResults.flatMap(result => result.rsbLevels)
+  )].sort((a, b) => a - b);
+
+  // Agréger toutes les erreurs
+  const aggregatedErrors: PhonemeError[] = [];
+  let aggregatedTotalPhonemes = 0;
+  let aggregatedCorrectPhonemes = 0;
+  let aggregatedPhoneticDistance = 0;
+
+  analysisResults.forEach(result => {
+    aggregatedErrors.push(...result.totalAnalysis.errors);
+    aggregatedTotalPhonemes += result.totalAnalysis.totalPhonemes;
+    aggregatedCorrectPhonemes += result.totalAnalysis.correctPhonemes;
+    aggregatedPhoneticDistance += result.totalAnalysis.phoneticDistanceAvg * result.totalAnalysis.totalPhonemes;
+  });
+
+  const avgPhoneticDistance = aggregatedPhoneticDistance / aggregatedTotalPhonemes;
+
+  // Agréger les erreurs par catégorie
+  const aggregatedErrorsByCategory = {
+    voyelles: [] as PhonemeError[],
+    consonnes: [] as PhonemeError[],
+    nasales: [] as PhonemeError[],
+    occlusives: [] as PhonemeError[],
+    fricatives: [] as PhonemeError[]
+  };
+
+  aggregatedErrors.forEach(error => {
+    const categories = getPhonemeCategory(error.target);
+    categories.forEach(category => {
+      if (category === 'voyelle') aggregatedErrorsByCategory.voyelles.push(error);
+      if (category === 'consonne') aggregatedErrorsByCategory.consonnes.push(error);
+      if (category === 'nasales') aggregatedErrorsByCategory.nasales.push(error);
+      if (category === 'occlusives') aggregatedErrorsByCategory.occlusives.push(error);
+      if (category === 'fricatives') aggregatedErrorsByCategory.fricatives.push(error);
+    });
+  });
+
+  // Agréger les erreurs par position
+  const aggregatedErrorsByPosition = {
+    debut: [] as PhonemeError[],
+    milieu: [] as PhonemeError[],
+    fin: [] as PhonemeError[]
+  };
+
+  aggregatedErrors.forEach(error => {
+    const targetPhonemes = transcribeToPhonemes(error.wordTarget);
+    const posCategory = getPositionCategory(error.position, targetPhonemes.length);
+    aggregatedErrorsByPosition[posCategory].push(error);
+  });
+
+  // Agréger les erreurs par RSB
+  const aggregatedErrorsByRsb: { [rsb: number]: PhonemeError[] } = {};
+  aggregatedErrors.forEach(error => {
+    if (!aggregatedErrorsByRsb[error.rsb]) {
+      aggregatedErrorsByRsb[error.rsb] = [];
+    }
+    aggregatedErrorsByRsb[error.rsb].push(error);
+  });
+
+  // Calculer la matrice de confusion agrégée
+  const confusionMap = new Map<string, Map<string, number>>();
+  aggregatedErrors.forEach(error => {
+    if (error.errorType === 'substitution') {
+      if (!confusionMap.has(error.target)) {
+        confusionMap.set(error.target, new Map());
+      }
+      const responseMap = confusionMap.get(error.target)!;
+      responseMap.set(error.response, (responseMap.get(error.response) || 0) + 1);
+    }
+  });
+
+  const aggregatedConfusionMatrix: PhonemeConfusion[] = [];
+  confusionMap.forEach((responseMap, target) => {
+    responseMap.forEach((count, response) => {
+      const errorInstances = aggregatedErrors.filter(e => 
+        e.target === target && e.response === response && e.errorType === 'substitution'
+      );
+      const avgRsb = errorInstances.reduce((sum, e) => sum + e.rsb, 0) / errorInstances.length;
+      
+      aggregatedConfusionMatrix.push({
+        targetPhoneme: target,
+        responsePhoneme: response,
+        count,
+        percentage: (count / aggregatedTotalPhonemes) * 100,
+        avgRsb
+      });
+    });
+  });
+
+  // Analyse totale agrégée
+  const aggregatedTotalAnalysis: PhonemeAnalysis = {
+    totalPhonemes: aggregatedTotalPhonemes,
+    correctPhonemes: aggregatedCorrectPhonemes,
+    errors: aggregatedErrors,
+    confusionMatrix: aggregatedConfusionMatrix,
+    errorsByRsb: aggregatedErrorsByRsb,
+    errorsByCategory: aggregatedErrorsByCategory,
+    errorsByPosition: aggregatedErrorsByPosition,
+    phoneticAccuracy: (aggregatedCorrectPhonemes / aggregatedTotalPhonemes) * 100,
+    phoneticDistanceAvg: avgPhoneticDistance
+  };
+
+  // Analyses par niveau RSB agrégées
+  const aggregatedAnalysisByRsb: { [rsb: number]: PhonemeAnalysis } = {};
+  
+  allRsbLevels.forEach(rsb => {
+    const rsbErrors = aggregatedErrors.filter(e => e.rsb === rsb);
+    
+    // Calculer le total de phonèmes pour ce niveau RSB
+    let rsbTotalPhonemes = 0;
+    analysisResults.forEach(result => {
+      if (result.analysisByRsb[rsb]) {
+        rsbTotalPhonemes += result.analysisByRsb[rsb].totalPhonemes;
+      }
+    });
+    
+    const rsbCorrectPhonemes = rsbTotalPhonemes - rsbErrors.length;
+    
+    // Calculer la distance phonétique moyenne pour ce RSB
+    let rsbDistanceSum = 0;
+    let rsbTestCount = 0;
+    analysisResults.forEach(result => {
+      if (result.analysisByRsb[rsb]) {
+        rsbDistanceSum += result.analysisByRsb[rsb].phoneticDistanceAvg * result.analysisByRsb[rsb].totalPhonemes;
+        rsbTestCount += result.analysisByRsb[rsb].totalPhonemes;
+      }
+    });
+    const rsbAvgDistance = rsbTestCount > 0 ? rsbDistanceSum / rsbTestCount : 0;
+
+    aggregatedAnalysisByRsb[rsb] = {
+      totalPhonemes: rsbTotalPhonemes,
+      correctPhonemes: rsbCorrectPhonemes,
+      errors: rsbErrors,
+      confusionMatrix: aggregatedConfusionMatrix.filter(c => 
+        rsbErrors.some(e => e.target === c.targetPhoneme && e.response === c.responsePhoneme)
+      ),
+      errorsByRsb: { [rsb]: rsbErrors },
+      errorsByCategory: {
+        voyelles: rsbErrors.filter(e => getPhonemeCategory(e.target).includes('voyelle')),
+        consonnes: rsbErrors.filter(e => getPhonemeCategory(e.target).includes('consonne')),
+        nasales: rsbErrors.filter(e => getPhonemeCategory(e.target).includes('nasales')),
+        occlusives: rsbErrors.filter(e => getPhonemeCategory(e.target).includes('occlusives')),
+        fricatives: rsbErrors.filter(e => getPhonemeCategory(e.target).includes('fricatives'))
+      },
+      errorsByPosition: {
+        debut: rsbErrors.filter(e => {
+          const phonemes = transcribeToPhonemes(e.wordTarget);
+          return getPositionCategory(e.position, phonemes.length) === 'debut';
+        }),
+        milieu: rsbErrors.filter(e => {
+          const phonemes = transcribeToPhonemes(e.wordTarget);
+          return getPositionCategory(e.position, phonemes.length) === 'milieu';
+        }),
+        fin: rsbErrors.filter(e => {
+          const phonemes = transcribeToPhonemes(e.wordTarget);
+          return getPositionCategory(e.position, phonemes.length) === 'fin';
+        })
+      },
+      phoneticAccuracy: rsbTotalPhonemes > 0 ? (rsbCorrectPhonemes / rsbTotalPhonemes) * 100 : 0,
+      phoneticDistanceAvg: rsbAvgDistance
+    };
+  });
+
+  // Calcul de la précision phonétique par RSB
+  const aggregatedPhoneticAccuracyByRsb = allRsbLevels.map(rsb => 
+    aggregatedAnalysisByRsb[rsb] ? aggregatedAnalysisByRsb[rsb].phoneticAccuracy : 0
+  );
+
+  return {
+    personName: `📊 Analyse Agrégée (${analysisResults.length} participant${analysisResults.length > 1 ? 's' : ''})`,
+    rsbLevels: allRsbLevels,
+    phoneticAccuracyByRsb: aggregatedPhoneticAccuracyByRsb,
+    totalAnalysis: aggregatedTotalAnalysis,
+    analysisByRsb: aggregatedAnalysisByRsb
+  };
+}
+
 // Comparaison phonétique entre deux personnes
 export function comparePhoneticAnalysis(
   analysis1: PhoneticAnalysisResult, 
